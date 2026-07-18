@@ -1,0 +1,26 @@
+[project]
+name = "ticket-triage"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Pradhnyesh Khorgade", email = "pradhnyeshk@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "pandas>=3.0.3",
+    "psycopg[binary]>=3.3.4",
+    "python-dotenv>=1.2.2",
+]
+
+[project.scripts]
+ticket-triage = "ticket_triage:main"
+
+[build-system]
+requires = ["uv_build>=0.11.29,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]

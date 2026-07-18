@@ -1,0 +1,27 @@
+# Data (raw CFPB export, downloaded artifacts, DB dumps)
+*.csv
+*.csv.zip
+data/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Environment / secrets
+.env
+
+# Model checkpoints / experiment tracking artifacts
+checkpoints/
+mlruns/
+wandb/
+
+# macOS
+.DS_Store
+
+# Local-only planning docs (not published to GitHub)
+CLAUDE.md
+Project1_Build_Plan.docx
