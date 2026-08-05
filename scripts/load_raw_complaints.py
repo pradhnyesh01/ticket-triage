@@ -30,9 +30,12 @@ def main():
     conn.autocommit = False
 
     with conn.cursor() as cur:
-        print("Dropping and recreating table...")
-        cur.execute("DROP TABLE IF EXISTS raw_complaints;")
+        print("Ensuring table exists...")
         run_sql_file(cur, SQL_DIR / "001_raw_complaints_schema.sql")
+        conn.commit()
+
+        print("Truncating table for a clean load...")
+        cur.execute("TRUNCATE raw_complaints;")
         conn.commit()
 
         print(f"Copying {CSV_PATH} into raw_complaints ...")
