@@ -35,3 +35,16 @@ dev = [
     "nbconvert>=7.17.1",
     "pytest>=9.1.1",
 ]
+
+# CPU-only torch: the default PyPI build bundles CUDA, which is dead
+# weight for inference-only serving (no GPU at request time -- training
+# used Colab's T4 instead). This resolves the CPU wheel on every
+# platform, not just in Docker, since it's also correct for local macOS
+# dev (no CUDA support there regardless).
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
