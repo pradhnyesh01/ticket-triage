@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    # A bare Postgres, no CFPB data loaded -- tests/test_priority_label_sql.py
+    # is deliberately self-contained (creates and drops its own test table),
+    # so it needs Postgres reachable but not the real 8.5GB dataset or the
+    # project's own sql/*.sql views applied.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ticket_triage
+          POSTGRES_PASSWORD: ci_test_pw
+          POSTGRES_DB: ticket_triage
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      POSTGRES_USER: ticket_triage
+      POSTGRES_PASSWORD: ci_test_pw
+      POSTGRES_DB: ticket_triage
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        run: uv python install 3.13
+
+      - name: Install dependencies
+        run: uv sync --extra pipeline --extra serve
+
+      - name: Lint
+        run: uv run ruff check .
+
+      - name: Test
+        run: uv run pytest -v
