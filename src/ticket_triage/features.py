@@ -8,7 +8,8 @@ timely_response, tags, company_public_response), may reach a model as
 input, at training or inference time.
 """
 
-from typing import Mapping, TypedDict
+from collections.abc import Mapping
+from typing import TypedDict
 
 
 class ModelFeatures(TypedDict):

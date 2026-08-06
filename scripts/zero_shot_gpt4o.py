@@ -24,12 +24,10 @@ comparison, since they don't depend on the sample's class proportions.
 """
 
 import json
-import os
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import mlflow
 import pandas as pd
 from dotenv import load_dotenv
@@ -119,7 +117,11 @@ def classify_row(client: OpenAI, narrative: str, retries: int = 3) -> dict:
                 "completion_tokens": resp.usage.completion_tokens,
                 "error": None,
             }
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001 -- intentionally broad: this is a
+            # retry loop meant to catch any transient API failure (network,
+            # rate limit, malformed response) and back off, not a specific
+            # exception type. Narrowing it risks silently missing a real
+            # class of retryable errors.
             if attempt == retries - 1:
                 return {
                     "product_pred": None,
@@ -140,11 +142,9 @@ def run_predictions(sample: pd.DataFrame) -> pd.DataFrame:
             executor.submit(classify_row, client, row.narrative): i
             for i, row in enumerate(sample.itertuples())
         }
-        done = 0
-        for future in as_completed(futures):
+        for done, future in enumerate(as_completed(futures), start=1):
             i = futures[future]
             results[i] = future.result()
-            done += 1
             if done % 100 == 0:
                 print(f"  {done}/{len(sample)} complete")
     return pd.concat([sample.reset_index(drop=True), pd.DataFrame(results)], axis=1)
